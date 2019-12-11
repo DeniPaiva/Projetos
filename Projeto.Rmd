@@ -1,0 +1,87 @@
+---
+title: "Projeto IV - Análise do banco de dados 'número de incêndios no Brasil'"
+author: "Denise de Assis Paiva"
+date: "20 de novembro de 2019"
+output:
+  html_document: default
+  pdf_document: default
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+```{r, message=FALSE}
+library(tm)
+library(SnowballC)
+library(wordcloud)
+library(base)
+```
+
+Os dados referem-se aos focos de calor nos estados brasileiros de janeiro de 1998 a novembro de 2017, sendo as variáveis:
+
+* Ano;
+* Estado;
+* Mês;
+* Número;
+* Período.
+
+O objetivo do projeto é criar a a *wordcloud* dispondo de algumas variáveis. Para criar a *wordcloud* foram usadas apenas as variáveis *Estado* e *Mês*.
+
+A seguir a leitura do arquivo:
+
+```{r}
+setwd("~/Mestrado UFLA/4 Semestre/Analise e Visualizacao de Dados/Projeto/Projeto IV")
+dados <- read.csv2("rf_incendiosflorestais_focoscalor_estados_1998-2017.csv")
+dados1 <- dados[,2:3] 
+```
+
+Primeiro passo, criar um corpus:
+
+```{r}
+(corpus <- VCorpus(VectorSource(dados1)))
+```
+
+Resumo dos dados:
+```{r}
+summary(corpus)
+```
+
+Matriz de frequência:
+```{r}
+(matriz_termos <- DocumentTermMatrix(corpus))
+```
+
+```{r}
+matriz <- TermDocumentMatrix(corpus)
+
+matriz <- as.matrix(matriz)
+```
+
+
+```{r}
+palavras <- sort(rowSums(matriz),decreasing=TRUE)
+palavras <- data.frame(word = names(palavras),freq=palavras)
+palavras
+```
+
+```{r}
+table(palavras$freq)
+
+pal2 <- brewer.pal(7,"Greens")
+max(palavras$freq)
+```
+
+Finaliza-se com a criação do *wordcloud*.
+
+```{r}
+wordcloud(palavras$word,
+          palavras$freq, 
+          min.freq=1,
+          max.words=Inf,
+          random.order = FALSE,
+          rot.per=.1, 
+          colors=pal2)
+```
+
+

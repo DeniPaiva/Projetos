@@ -1,0 +1,140 @@
+---
+title: "Projeto VI: Focos de calor nos estados brasileiros de 1998 a 2017"
+author: "Denise de Assis Paiva"
+date: "30 de setembro de 2019"
+output:
+  html_document:
+    df_print: paged
+  pdf_document: default
+---
+
+```{r setup, include=FALSE}
+options(Encoding="UTF-8")
+
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+Os dados abaixo se referem aos números de focos de calor nos estados brasileiros de janeiro de 1998 a novembro de 2017 e estão disponíveis no site do Portal Brasileiro de Dados Abertos. Abaixo seguem os links para acesso: 
+
+http://dados.gov.br/dataset/sistema-nacional-de-informacoes-florestais-snif/resource/949310f1-05bc-4f56-a63f-aef67aac6164
+
+http://dados.gov.br/dataset/sistema-nacional-de-informacoes-florestais-snif
+
+```{r, message=FALSE, include=FALSE}
+library("tidyverse")
+library("forcats")
+library("lubridate")
+library("qwraps2")
+library("knitr")
+library(xtable)
+library("lmtest")
+```
+
+Na Tabela 1 encontram-se a descrição das variáveis.
+
+|      Focos de calor no Brasil entre os anos de 1998 e 2017     |
+|--------|-------------------------------------------------------|
+| Ano    | Ano em que os focos de calor ocorreram                |
+| Estado | Estado em que os focos de calor ocorreram             |
+| Mês    | Mês em que os focos de calor ocorreram                |
+| Número | Número de ocorrência de focos de calor                |
+
+```{r}
+setwd("C:/Users/Usuario/Documents/Mestrado UFLA/4 Semestre/Analise e Visualizacao de Dados/Projeto/Projeto VI")
+dados<-read.csv("rf_incendiosflorestais_focoscalor_estados_1998-2017.csv",header=T,sep = ";")
+glimpse(dados)
+```
+
+Tem-se 6454 observações com 5 variáveis como apresentado através da função *glimpse*.
+
+\begin{table}[!htp]
+	\centering
+	\caption{Focos de calor no Brasil entre os anos de 1998 e 2017.}\label{MAPE}
+	\vspace{0.2mm}
+	\begin{tabular}{cc} \hline
+		Variável  & Descrição \\ \hline
+		Ano     & Ano em que os focos de calor ocorreram.  \\
+		Estado  & Estado em que os focos de calor ocorreram.\\
+		Mês     & Mês em que os focos de calor ocorreram.  \\
+		Número  & Número de ocorrência de focos de calor. \\
+		Período & Ano em que os focos de calor ocorreram, em formatação de data.\\
+		
+		\hline
+	\end{tabular}
+	\label{mape}
+	
+	Fonte: {Produzido pelo autor}
+\end{table}
+
+
+A seguir apresentam-se os totais de focos de calor no Brasil desde 1998.
+
+```{r}
+sum(dados$Numero)
+```
+Observa-se que durante o intervalo de janeiro de 1998 a novembro de 2017, houveram no Brasil 3.663.030 focos de calor. A seguir, serão apresentados os números de focos de calor por região no Brasil.
+
+
+**Comparando o número de focos de calor entre as regiões do Brasil**
+
+**Região Sudeste**
+
+```{r}
+dados_sudeste = dados%>%filter(Estado == "Minas Gerais"| Estado == "Rio de Janeiro"| Estado == "São Paulo"| Estado == "Espírito Santo")
+
+ggplot(data=dados_sudeste,aes(x=Estado,y=Numero))+
+  geom_bar(stat = "identity",fill= "red")+theme_classic()
+```
+
+Verifica-se que dentre os estados da região sudeste, Minas Gerais é o maior em relação ao número de focos de calor desde 1998 a 2017, seguido dos estados São Paulo, Rio de Janeiro e Espírito Santo.
+
+**Região Sul**
+
+```{r}
+dados_sul = dados%>%filter(Estado == "Santa Catarina"| Estado == "Paraná" | Estado == "Rio Grande do Sul")
+ggplot(data=dados_sul, aes(x=Estado, y=Numero)) +
+  geom_bar(stat="identity",fill= "blue")+
+  theme_classic()
+```
+
+Em relação a região sul do país observa-se que o estado com maior número de focos de calor é o Paraná, sendo que os estados de Santa Catarina e Rio Grande do Sul apresentaram números de focos de calor iguais a 27.209 e 29.891, respectivamente. 
+
+**Região Centro-Oeste**
+
+```{r}
+dados_centro = dados%>%filter(Estado == "Mato Grosso"| Estado == "Mato Grosso do Sul"| Estado == "Distrito Federal" | Estado == "Goiás")
+ggplot(data=dados_centro, aes(x=Estado, y=Numero)) +
+  geom_bar(stat="identity",fill= "green")+
+  theme_classic()
+```
+
+Comparando os estados da região centro-oeste, nota-se que o estado do Mato Grosso apresenta o maior número de focos de calor, além disso, Mato Grosso também apresenta o maior número em relação ao país (723.629), seguido do estado do Pará (638.042).
+
+**Região Nordeste**
+
+```{r}
+dados_nordeste = dados%>%filter(Estado == "Alagoas"| Estado == "Bahia" | Estado == "Ceará"| Estado == "Maranhão"| Estado == "Paraíba"| Estado == "Piauí"| Estado == "Pernambuco"| Estado == "Rio Grande do Norte"| Estado == "Sergipe")
+ggplot(data=dados_nordeste, aes(x=Estado, y=Numero)) +
+  geom_bar(stat="identity",fill= "pink")+
+  theme_classic()+scale_x_discrete(labels=abbreviate)
+```
+
+Sabe-se que a região nordeste possui o maior número de estados brasileiros, além disso, observa-se que os estados do Maranhão e Alagoas possuem o maior e menor número de focos de calor, sendo respectivamente 405.879 e 4.644, havendo uma discrepância em relação a esses estados. 
+
+
+**Região Norte**
+
+```{r}
+dados_norte = dados%>%filter(Estado == "Acre" & Numero>0| Estado == "Amapá"| Estado == "Amazonas"| Estado == "Pará"| Estado == "Rondônia"| Estado == "Roraima"| Estado == "Tocantins")
+ggplot(data=dados_norte, aes(x=Estado, y=Numero)) +
+  geom_bar(stat="identity",fill= "orange")+
+  theme_classic()
+```
+
+Para finalizar, a última região analisada foi a região norte. Verifica-se que o estado do Pará possui o maior número de focos de calor, seguido dos estados do Tocantins, Rondônia, Amazonas, Acre, Amapá e Roraima. 
+
+
+
+
+
+
